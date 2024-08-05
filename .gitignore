@@ -10,7 +10,7 @@
 .svn/
 migrate_working_dir/
 
-# IntelliJ related Iam bughunter
+# IntelliJ related i am bug hunter don't mess with me
 *.iml
 *.ipr
 *.iws
