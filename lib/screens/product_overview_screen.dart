@@ -6,6 +6,7 @@ import '../widgets/drawer.dart';
 import 'package:shopy/widgets/gridview_widget.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:provider/provider.dart';
+import '../widgets/loading.dart';
 
 enum SelectedOption {
   ShowAll,
@@ -112,9 +113,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
           )
         ],
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : GridviewWidget(filter),
+      body: _isLoading ? Loading('loading...') : GridviewWidget(filter),
     );
   }
 }

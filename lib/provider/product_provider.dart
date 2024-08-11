@@ -6,9 +6,20 @@ import '../models/http_exception.dart';
 
 class ProductProvider with ChangeNotifier {
   List<Product> _items = [];
-  static const String baseUrl =
-      'https://shoproject-e4a02-default-rtdb.firebaseio.com/products.json';
-  final Uri url = Uri.parse(baseUrl);
+  static const String baseUrl = 'shoproject-e4a02-default-rtdb.firebaseio.com';
+
+  String? authToken;
+  String? userId;
+
+  ProductProvider(this.authToken, this.userId, this._items);
+
+  Uri getUri(String path, [Map<String, String>? queryParams]) {
+    final Map<String, String> params = {'auth': authToken!};
+    if (queryParams != null) {
+      params.addAll(queryParams);
+    }
+    return Uri.https(baseUrl, path, params);
+  }
 
   List<Product> get items {
     return [..._items];
@@ -18,21 +29,37 @@ class ProductProvider with ChangeNotifier {
     return _items.where((prod) => prod.isFavorite).toList();
   }
 
-  Future<void> fetchAndSet() async {
+  Future<void> fetchAndSet([bool filterByuserId = false]) async {
+    final filterOption = filterByuserId
+        ? {
+            'orderBy': '"creatorId"',
+            'equalTo': '"$userId"',
+          }
+        : null;
+    var url = getUri('/products.json', filterOption as Map<String, String>?);
     try {
       final response = await http.get(url);
+      if (response.body == 'null') return;
+
+      final Uri productUrl = Uri.parse(
+          'https://shoproject-e4a02-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(productUrl);
+      final favoriteData = json.decode(favoriteResponse.body);
+
       final Map<String, dynamic> res = json.decode(response.body);
       List<Product> _tempProductList = [];
       res.forEach(
-        (key, value) {
+        (prodId, value) {
           _tempProductList.add(
             Product(
-                id: key,
-                description: value['description'],
-                imageUrl: value['imageUrl'],
-                price: value['price'],
-                title: value['title'],
-                isFavorite: value['isFavorite']),
+              id: prodId,
+              description: value['description'],
+              imageUrl: value['imageUrl'],
+              price: value['price'],
+              title: value['title'],
+              isFavorite:
+                  favoriteData == null ? false : favoriteData[prodId] ?? false,
+            ),
           );
         },
       );
@@ -44,6 +71,7 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
+    final url = getUri('/products.json');
     try {
       final response = await http.post(
         url,
@@ -53,7 +81,7 @@ class ProductProvider with ChangeNotifier {
             'price': product.price,
             'description': product.description,
             'imageUrl': product.imageUrl,
-            'isFavorite': product.isFavorite,
+            'creatorId': userId,
           },
         ),
       );
@@ -64,7 +92,6 @@ class ProductProvider with ChangeNotifier {
         imageUrl: product.imageUrl,
         price: product.price,
         title: product.title,
-        isFavorite: product.isFavorite,
       );
       _items.insert(0, productAdd);
       notifyListeners();
@@ -79,8 +106,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> updateProduct(Product product, String id) async {
     final int productIndex = _items.indexWhere((prod) => prod.id == id);
-    final Uri productUrl = Uri.parse(
-        'https://shoproject-e4a02-default-rtdb.firebaseio.com/products/$id.json');
+    final Uri productUrl = getUri('/products/$id.json');
 
     if (productIndex >= 0) {
       try {
@@ -110,8 +136,7 @@ class ProductProvider with ChangeNotifier {
     final removedProduct = _items.removeAt(index);
     notifyListeners();
 
-    final Uri productUrl = Uri.parse(
-        'https://shoproject-e4a02-default-rtdb.firebaseio.com/products/$id.json');
+    final Uri productUrl = getUri('/products/$id.json');
 
     try {
       final response = await http.delete(productUrl);
@@ -124,6 +149,7 @@ class ProductProvider with ChangeNotifier {
       }
     } catch (error) {
       // Rollback and handle other potential errors
+      _items.insert(index, removedProduct);
       notifyListeners();
       print('Error during HTTP delete request: $error');
       throw HttpException('Failed to delete product: $error');

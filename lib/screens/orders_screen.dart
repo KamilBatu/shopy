@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopy/provider/orders_provider.dart';
+import '../widgets/loading.dart';
 import '../widgets/drawer.dart';
 import 'package:provider/provider.dart';
 import '../widgets/order_widget.dart';
@@ -35,23 +36,28 @@ class _OrdersScreenState extends State<OrdersScreen> {
       drawer: DrawerWidget(),
       appBar: AppBar(
         title: Text(
-          'ORders',
+          'Orders',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Colors.deepPurple,
       ),
       body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              itemCount: ordersProvided.ordersList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return OrderWidget(ordersProvided.ordersList[index]);
-              },
-            ),
+          ? Loading('fetching orders...')
+          : ordersProvided.ordersList.isEmpty
+              ? Center(
+                  child: Text(
+                    'No orders found.',
+                    style: TextStyle(fontSize: 18, color: Colors.orange),
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  itemCount: ordersProvided.ordersList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return OrderWidget(ordersProvided.ordersList[index]);
+                  },
+                ),
     );
   }
 }

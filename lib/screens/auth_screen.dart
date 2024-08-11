@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shopy/provider/auth_provider.dart';
+import 'package:shopy/widgets/loading.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode {
   login,
@@ -50,7 +51,6 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _passwordController.dispose();
     super.dispose();
   }
@@ -80,11 +80,26 @@ class _AuthCardState extends State<AuthCard> {
     }
   }
 
+  void _showErrorDialog(errorMessage) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Okay'))
+              ],
+              content: Text(errorMessage),
+              title: Text('error Occured'),
+            ));
+  }
+
   Future<void> _saveForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     _formKey.currentState!.save();
 
     setState(() {
@@ -100,8 +115,30 @@ class _AuthCardState extends State<AuthCard> {
             .signUp(_authData['email']!, _authData['password']!);
       }
       // Handle login or other modes if necessary
+    } on HttpException catch (error) {
+      var errorMessage = 'Authentication failed';
+      if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage =
+            'There is no user record corresponding to this identifier';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = 'The password is invalid';
+      } else if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMessage =
+            'The email address is already in use by another account.';
+      } else if (error.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'The email address is badly formatted';
+      } else if (error.toString().contains('USER_NOT_FOUND')) {
+        errorMessage =
+            'There is no user record corresponding to this identifier';
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'The password must be 6 characters long or more';
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'The password must be 6 characters long or more';
+      }
+      _showErrorDialog(errorMessage);
     } catch (error) {
-      // Handle errors (e.g., show a dialog or a snackbar)
+      const errorMessage = 'Couldnot authenticate you. please try again later';
+      _showErrorDialog(errorMessage);
     } finally {
       setState(() {
         _isLoading = false;
@@ -113,14 +150,17 @@ class _AuthCardState extends State<AuthCard> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+              child: LinearProgressIndicator(
+              color: Colors.deepPurple,
+            ))
           : Column(
               children: [
                 Center(
                     child: Padding(
                   padding: EdgeInsets.only(top: 100),
                   child: Text(
-                    'Welcome to sHoPy',
+                    'Welcome to shopy',
                     style: TextStyle(color: Colors.deepPurple, fontSize: 32),
                   ),
                 )),
