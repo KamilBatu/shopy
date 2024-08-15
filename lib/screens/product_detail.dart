@@ -30,7 +30,9 @@ class ProductDetail extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.network(productItem.imageUrl),
+            Hero(
+                tag: productItem.id,
+                child: Image.network(productItem.imageUrl)),
             Card(
               child: ListTile(
                 leading: Text(

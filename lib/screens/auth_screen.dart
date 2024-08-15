@@ -15,16 +15,7 @@ class AuthScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(
-            'auth',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: Colors.deepPurple,
-      ),
+      backgroundColor: Colors.white70,
       body: AuthCard(),
     );
   }
@@ -148,158 +139,162 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: _isLoading
-          ? Center(
-              child: LinearProgressIndicator(
-              color: Colors.deepPurple,
-            ))
-          : Column(
-              children: [
-                Center(
-                    child: Padding(
-                  padding: EdgeInsets.only(top: 100),
-                  child: Text(
-                    'Welcome to shopy',
-                    style: TextStyle(color: Colors.deepPurple, fontSize: 32),
-                  ),
-                )),
-                Card(
-                  margin: EdgeInsets.all(20),
-                  shadowColor: const Color.fromARGB(255, 200, 190, 218),
-                  elevation: 14,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 14),
-                          child: TextFormField(
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'can\'t be empty';
-                                }
-
-                                if (!value.contains('@') ||
-                                    !value.endsWith('.com') ||
-                                    value.length <= 8) {
-                                  return 'invalid email';
-                                }
-                              },
-                              decoration: InputDecoration(
-                                label: Text('email'),
-                              ),
-                              onFieldSubmitted: (_) {
-                                FocusScope.of(context)
-                                    .requestFocus(_passwordFocusNode);
-                              },
-                              onSaved: (value) {
-                                _authData['email'] = value!;
-                              }),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 14),
-                          child: TextFormField(
-                            controller: _passwordController,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'password field is empty';
-                              }
-                              if (value!.length < 6) {
-                                return 'password is too short';
-                              }
-                            },
-                            obscureText: !_isPasswordVisible,
-                            textInputAction: TextInputAction.next,
-                            decoration: InputDecoration(
-                              label: Text('password'),
-                            ),
-                            focusNode: _passwordFocusNode,
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_confirmPasswordFocusNode);
-                            },
-                            onSaved: (value) {
-                              _authData['password'] = value!;
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        if (_authMode != AuthMode.login)
+    return Container(
+      color: Colors.white70,
+      child: SingleChildScrollView(
+        child: _isLoading
+            ? Center(
+                child: LinearProgressIndicator(
+                color: Colors.deepPurple,
+              ))
+            : Column(
+                children: [
+                  Center(
+                      child: Padding(
+                    padding: EdgeInsets.only(top: 100),
+                    child: Text(
+                      'Welcome to shopy',
+                      style: TextStyle(color: Colors.deepPurple, fontSize: 32),
+                    ),
+                  )),
+                  Card(
+                    margin: EdgeInsets.all(20),
+                    shadowColor: const Color.fromARGB(255, 200, 190, 218),
+                    elevation: 14,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 14),
                             child: TextFormField(
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'can\'t be empty';
+                                  }
+
+                                  if (!value.contains('@') ||
+                                      !value.endsWith('.com') ||
+                                      value.length <= 8) {
+                                    return 'invalid email';
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  label: Text('email'),
+                                ),
+                                onFieldSubmitted: (_) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_passwordFocusNode);
+                                },
+                                onSaved: (value) {
+                                  _authData['email'] = value!;
+                                }),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 14),
+                            child: TextFormField(
+                              controller: _passwordController,
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return 'password field is empty';
                                 }
-                                if (value.length < 6) {
+                                if (value!.length < 6) {
                                   return 'password is too short';
-                                }
-                                if (value != _passwordController.text) {
-                                  return 'not match';
                                 }
                               },
                               obscureText: !_isPasswordVisible,
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
-                                label: Text('confirm password'),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _isPasswordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isPasswordVisible = !_isPasswordVisible;
-                                    });
-                                  },
-                                ),
+                                label: Text('password'),
                               ),
-                              focusNode: _confirmPasswordFocusNode,
+                              focusNode: _passwordFocusNode,
+                              onFieldSubmitted: (_) {
+                                FocusScope.of(context)
+                                    .requestFocus(_confirmPasswordFocusNode);
+                              },
                               onSaved: (value) {
                                 _authData['password'] = value!;
                               },
                             ),
                           ),
-                        SizedBox(
-                          height: 40,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            _saveForm();
-                          },
-                          child: Text(
-                            _elevetedButton,
-                            style: TextStyle(color: Colors.white),
+                          SizedBox(
+                            height: 10,
                           ),
-                          style: ButtonStyle(
-                              backgroundColor:
-                                  WidgetStatePropertyAll(Colors.deepPurple),
-                              elevation: WidgetStatePropertyAll(16)),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            switchButton();
-                          },
-                          child: Text(_textButton),
-                        )
-                      ],
+                          if (_authMode != AuthMode.login)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 14),
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'password field is empty';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'password is too short';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'not match';
+                                  }
+                                },
+                                obscureText: !_isPasswordVisible,
+                                textInputAction: TextInputAction.next,
+                                decoration: InputDecoration(
+                                  label: Text('confirm password'),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isPasswordVisible
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isPasswordVisible =
+                                            !_isPasswordVisible;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                focusNode: _confirmPasswordFocusNode,
+                                onSaved: (value) {
+                                  _authData['password'] = value!;
+                                },
+                              ),
+                            ),
+                          SizedBox(
+                            height: 40,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _saveForm();
+                            },
+                            child: Text(
+                              _elevetedButton,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    WidgetStatePropertyAll(Colors.deepPurple),
+                                elevation: WidgetStatePropertyAll(16)),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              switchButton();
+                            },
+                            child: Text(_textButton),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 }

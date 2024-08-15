@@ -51,7 +51,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       drawer: DrawerWidget(),
       appBar: AppBar(
         title: Text(
-          'sHopY',
+          'shopy',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),

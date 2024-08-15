@@ -11,11 +11,8 @@ class AuthProvider with ChangeNotifier {
   String? _userId;
   Timer? _authTimer;
   String? _email;
-
   String? get email => _email;
-
   bool get isAuth => token != null;
-
   String? get userId => _userId;
 
   Future<void> logout() async {
@@ -79,6 +76,7 @@ class AuthProvider with ChangeNotifier {
         if (segment == 'signInWithPassword') {
           _email = responseData['email'];
         }
+
         print(responseData);
       }
     } catch (e) {
@@ -134,4 +132,60 @@ class AuthProvider with ChangeNotifier {
   Future<void> login(String email, String password) async {
     return authenticate(email, password, 'signInWithPassword');
   }
+
+  // send email verification https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=[API_KEY]
+
+  // Future<void> sendEmailVerification(String idToken) async {
+  //   final url = Uri.parse(
+  //       ' https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyBk1LU62j0FNdSxAYNuYSvF_HKIyVKALcE');
+  //   try {
+  //     final response = await http.post(url,
+  //         body: json.encode({
+  //           'requestType': 'VERIFY_EMAIL',
+  //           'idToken': idToken,
+  //         }),
+  //         headers: {'Content-Type': 'application/json'});
+
+  //     final responseData = json.decode(response.body);
+
+  //     if (responseData['error'] != null) {
+  //       throw HttpException(responseData['error']['message']);
+  //     }
+  //     print("Verification email sent.");
+  //   } catch (e) {
+  //     print("Error sending verification email: $e");
+  //     throw e;
+  //   }
+  // }
+
+// email confirmation
+  Future<bool> isEmailVerified(String idToken) async {
+    final url = Uri.parse(
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBk1LU62j0FNdSxAYNuYSvF_HKIyVKALcE');
+    final response = await http.post(url,
+        body: json.encode({
+          'idToken': idToken,
+        }),
+        headers: {'Content-Type': 'application/json'});
+    final responseData = json.decode(response.body);
+
+    if (responseData['users'][0]['emailVerified'] == true) {
+      return true;
+    } else {
+      throw HttpException("Email not verified. Please verify your email.");
+    }
+  }
+// let user login
+// Future<void> login(String email, String password) async {
+//   // Authenticate the user
+//   await authenticate(email, password, 'signInWithPassword');
+
+//   // Check if the email is verified
+//   if (await isEmailVerified(_token!)) {
+//     // Proceed with login
+//     print("User is verified and can log in.");
+//   } else {
+//     throw HttpException("Email not verified. Please verify your email.");
+//   }
+// }
 }
